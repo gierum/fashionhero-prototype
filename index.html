@@ -1,0 +1,457 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Flat Fee Boost — FashionHero (prototyp WoZ / AT-1B-1)</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:       #ECE9E2;
+      --bg-oat:   #F5F4F1;
+      --ink:      #212121;
+      --muted:    #6B6B6B;
+      --border:   #CDCDCD;
+      --white:    #FFFFFF;
+      --obsidian: #1A1A1A;
+      --navy:     #2A3A5C;
+      --ease:     cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    body {
+      font-family: 'Geist', sans-serif;
+      background: var(--bg);
+      color: var(--ink);
+      min-height: 100vh;
+    }
+
+    /* ── TOP BAR ── */
+    .demo-bar {
+      background: var(--obsidian);
+      color: var(--white);
+      font-size: 11px;
+      font-weight: 500;
+      letter-spacing: 0.8px;
+      text-transform: uppercase;
+      text-align: center;
+      padding: 8px 16px;
+    }
+    .demo-bar span { color: var(--border); text-transform: none; letter-spacing: 0.2px; font-weight: 400; }
+
+    /* ── SPLIT LAYOUT ── */
+    .split {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      min-height: calc(100vh - 33px);
+    }
+    .zone {
+      padding: 40px;
+    }
+    .zone-left  { background: var(--white); border-right: 1px solid var(--border); }
+    .zone-right { background: var(--bg); }
+
+    .zone-tag {
+      font-size: 10px;
+      font-weight: 500;
+      letter-spacing: 0.8px;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 24px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .zone-tag::before {
+      content: "";
+      width: 6px; height: 6px;
+      background: var(--ink);
+    }
+
+    /* ── SELLER PANEL (LEFT) ── */
+    .seller-header { margin-bottom: 28px; }
+    .seller-name-row { display: flex; align-items: center; gap: 8px; margin-bottom: 4px; }
+    .seller-name { font-size: 20px; font-weight: 400; letter-spacing: -0.3px; }
+    .pro-badge {
+      background: var(--navy); color: var(--white);
+      font-size: 9px; font-weight: 700; letter-spacing: 0.5px;
+      padding: 3px 7px; border-radius: 9999px;
+    }
+    .seller-sub { font-size: 12px; color: var(--muted); }
+
+    /* Product card in panel */
+    .product-card {
+      border: 1px solid var(--border);
+      background: var(--white);
+      padding: 20px;
+      display: flex;
+      gap: 18px;
+      margin-bottom: 20px;
+    }
+    .pc-thumb {
+      width: 96px; height: 120px;
+      flex-shrink: 0;
+      background: linear-gradient(145deg, #d9cfc2, #efe9e0);
+      border: 1px solid var(--border);
+      position: relative;
+      overflow: hidden;
+    }
+    .pc-thumb img {
+      width: 100%; height: 100%;
+      object-fit: cover;
+      object-position: center 15%;
+      display: block;
+    }
+    .pc-info { flex: 1; }
+    .pc-name { font-size: 14px; font-weight: 500; letter-spacing: 0.3px; margin-bottom: 4px; }
+    .pc-variant { font-size: 12px; color: var(--muted); margin-bottom: 12px; }
+    .pc-stat-row { display: flex; gap: 24px; margin-top: auto; }
+    .pc-stat-num { font-size: 18px; font-weight: 400; letter-spacing: -0.3px; }
+    .pc-stat-label { font-size: 10px; font-weight: 500; letter-spacing: 0.6px; text-transform: uppercase; color: var(--muted); }
+    .stat-before { color: var(--muted); font-weight: 300; font-size: 0.75em; text-decoration: line-through; margin-right: 2px; }
+
+    /* Offer box */
+    .offer {
+      border: 1px solid var(--ink);
+      background: var(--bg);
+      padding: 24px;
+    }
+    .offer-tag {
+      font-size: 10px; font-weight: 500; letter-spacing: 0.8px;
+      text-transform: uppercase; color: var(--muted); margin-bottom: 10px;
+    }
+    .offer-headline {
+      font-size: 18px; font-weight: 400; letter-spacing: -0.2px;
+      line-height: 1.3; margin-bottom: 8px;
+    }
+    .offer-desc { font-size: 13px; font-weight: 300; color: var(--muted); line-height: 1.6; margin-bottom: 8px; }
+    .offer-price-row {
+      display: flex; align-items: baseline; gap: 8px;
+      margin: 18px 0 16px;
+    }
+    .offer-price { font-size: 30px; font-weight: 400; letter-spacing: -0.75px; }
+    .offer-period { font-size: 13px; color: var(--muted); }
+
+    .btn-primary {
+      width: 100%;
+      display: inline-flex; align-items: center; justify-content: center;
+      gap: 8px;
+      background: var(--ink); color: var(--white);
+      font-family: 'Geist', sans-serif;
+      font-size: 13px; font-weight: 500; letter-spacing: 0.5px;
+      text-transform: uppercase;
+      padding: 15px 24px;
+      border: none; border-radius: 0;
+      cursor: pointer;
+      transition: background 150ms var(--ease);
+    }
+    .btn-primary:hover { background: #333; }
+    .btn-primary:disabled { cursor: default; opacity: .9; }
+
+    .offer-fineprint { font-size: 11px; color: var(--muted); margin-top: 12px; line-height: 1.5; }
+
+    /* Loading state */
+    .spinner {
+      width: 14px; height: 14px;
+      border: 2px solid rgba(255,255,255,.35);
+      border-top-color: var(--white);
+      border-radius: 9999px;
+      animation: spin .7s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* Confirmation state */
+    .confirm {
+      border: 1px solid var(--ink);
+      background: var(--white);
+      padding: 24px;
+    }
+    .confirm-check {
+      width: 32px; height: 32px;
+      background: var(--ink); color: var(--white);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 16px; margin-bottom: 16px;
+    }
+    .confirm-title { font-size: 18px; font-weight: 400; letter-spacing: -0.2px; margin-bottom: 8px; }
+    .confirm-desc { font-size: 13px; font-weight: 300; color: var(--muted); line-height: 1.6; margin-bottom: 16px; }
+    .confirm-meta { border-top: 1px solid var(--border); padding-top: 14px; display: grid; gap: 8px; }
+    .confirm-meta-row { display: flex; justify-content: space-between; font-size: 12px; }
+    .confirm-meta-row span:first-child { color: var(--muted); }
+
+    .hidden { display: none; }
+
+    /* ── BUYER PREVIEW (RIGHT) ── */
+    .preview-frame {
+      border: 1px solid var(--border);
+      background: var(--white);
+    }
+    .preview-topbar {
+      background: var(--obsidian); color: var(--white);
+      font-size: 10px; letter-spacing: 0.8px; text-transform: uppercase;
+      text-align: center; padding: 6px;
+    }
+    .preview-nav {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 12px 16px; border-bottom: 1px solid var(--border);
+    }
+    .preview-logo { font-size: 15px; font-weight: 600; letter-spacing: -0.4px; }
+    .preview-navlinks { display: flex; gap: 14px; font-size: 11px; color: var(--muted); letter-spacing: 0.3px; }
+    .preview-crumb {
+      font-size: 10px; letter-spacing: 0.8px; text-transform: uppercase;
+      color: var(--muted); padding: 12px 16px 4px;
+    }
+    .preview-h1 { font-size: 22px; font-weight: 400; letter-spacing: -0.5px; padding: 0 16px 4px; }
+    .preview-count { font-size: 11px; color: var(--muted); padding: 0 16px 16px; }
+
+    .grid {
+      display: grid; grid-template-columns: repeat(3, 1fr);
+      gap: 20px 14px; padding: 0 16px 20px;
+    }
+    .cell { position: relative; transition: transform 450ms var(--ease); }
+    .cell-img {
+      width: 100%; aspect-ratio: 3/4;
+      border: 1px solid var(--border);
+      position: relative; overflow: hidden;
+      background: var(--bg-oat);
+    }
+    .cell-img img {
+      width: 100%; height: 100%;
+      object-fit: cover;
+      object-position: center 20%;
+      display: block;
+    }
+    .cell-name { font-size: 11px; font-weight: 500; letter-spacing: 0.5px; margin-top: 8px; }
+    .cell-variant { font-size: 10px; color: var(--muted); margin-top: 2px; }
+    .cell-price { font-size: 11px; font-weight: 500; margin-top: 4px; }
+    .cell-pos {
+      position: absolute; top: 6px; right: 6px;
+      font-size: 9px; color: var(--muted);
+      background: rgba(255,255,255,.85); padding: 2px 5px;
+    }
+
+    /* Promowane badge — follows BESTSELLER/NEW pattern from DESIGN.md */
+    .badge-promo {
+      position: absolute; top: 8px; left: 8px;
+      background: var(--white);
+      border: 1px solid var(--ink);
+      border-radius: 0;
+      font-size: 10px; font-weight: 500; letter-spacing: 0.5px;
+      text-transform: uppercase; color: var(--ink);
+      padding: 4px 8px;
+    }
+
+    /* Seller's own product highlight */
+    .cell.mine .cell-name { position: relative; }
+    .cell.mine::before {
+      content: "TWÓJ PRODUKT";
+      position: absolute; bottom: -16px; left: 0;
+      font-size: 9px; font-weight: 500; letter-spacing: 0.6px;
+      color: var(--navy);
+    }
+
+    /* WoZ annotation */
+    .woz-note {
+      margin-top: 24px;
+      font-size: 11px; color: var(--muted); line-height: 1.6;
+      border-left: 2px solid var(--border); padding: 4px 0 4px 12px;
+    }
+    .woz-note strong { color: var(--ink); font-weight: 500; }
+
+    @media (max-width: 900px) {
+      .split { grid-template-columns: 1fr; }
+      .zone-left { border-right: none; border-bottom: 1px solid var(--border); }
+      .grid { grid-template-columns: repeat(2, 1fr); }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="demo-bar">Prototyp — Wizard of Oz · AT-1B-1 &nbsp;<span>demo dla sellera, płatność i boost obsługiwane ręcznie</span></div>
+
+  <div class="split">
+
+    <!-- ══════════ LEFT: SELLER PANEL ══════════ -->
+    <section class="zone zone-left">
+      <div class="zone-tag">Panel sprzedawcy — co kupujesz</div>
+
+      <div class="seller-header">
+        <div class="seller-name-row">
+          <span class="seller-name">Studio Kamil</span>
+        </div>
+        <div class="seller-sub">Staż 4 mies. · 6 zamówień / mies. · Women's Fashion</div>
+      </div>
+
+      <!-- Product being promoted -->
+      <div class="product-card">
+        <div class="pc-thumb"><img src="images/07-ecru-basic.jpg" alt="Lniana sukienka BASIC — Ecru"></div>
+        <div class="pc-info">
+          <div class="pc-name">Lniana sukienka BASIC</div>
+          <div class="pc-variant">Ecru · r. S–L · 249 zł</div>
+          <div class="pc-stat-row">
+            <div>
+              <div class="pc-stat-num" id="posNow">#7</div>
+              <div class="pc-stat-label">Pozycja w kategorii</div>
+            </div>
+            <div>
+              <div class="pc-stat-num" id="viewsNow">~410</div>
+              <div class="pc-stat-label">Wyśw. / 7 dni</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- STATE 1: Offer (preview, zero zobowiązań) -->
+      <div class="offer" id="stateOffer">
+        <div class="offer-tag">Wyróżnij produkt</div>
+        <div class="offer-headline">Twój produkt na górze kategorii przez 7 dni.</div>
+        <div class="offer-desc">
+          Trafia w pierwszy rząd wyników z oznaczeniem „Wyróżnione". Zobacz najpierw, jak to będzie wyglądać — decyzję podejmiesz w następnym kroku.
+        </div>
+        <div class="offer-price-row">
+          <span class="offer-price">99 PLN</span>
+          <span class="offer-period">/ 7 dni · jednorazowo</span>
+        </div>
+        <button class="btn-primary" id="previewBtn" onclick="showPreview()">Zobacz, jak to będzie wyglądać</button>
+        <div class="offer-fineprint">Zero zobowiązań — to tylko podgląd efektu, jeszcze nie zakup.</div>
+      </div>
+
+      <!-- STATE 2: Previewed — efekt widoczny, teraz decyzja o zakupie -->
+      <div class="offer hidden" id="statePreviewed">
+        <div class="offer-tag">Podgląd gotowy</div>
+        <div class="offer-headline">Tak będzie wyglądał Twój produkt.</div>
+        <div class="offer-desc">
+          Nowa pozycja i szacowany zasięg widoczne powyżej, w statystykach. Zdecyduj, czy aktywować wyróżnienie na 7 dni.
+        </div>
+        <div class="offer-price-row">
+          <span class="offer-price">99 PLN</span>
+          <span class="offer-period">/ 7 dni · jednorazowo</span>
+        </div>
+        <button class="btn-primary" id="boostBtn" onclick="confirmBoost()">Wyróżnij ten produkt na 7 dni — 99 PLN</button>
+        <div class="offer-fineprint">Bez prowizji od sprzedaży. Płatność jednorazowa, bez odnawiania.</div>
+      </div>
+
+      <!-- STATE 3: Loading -->
+      <div class="offer hidden" id="stateLoading">
+        <div class="offer-tag">Zgłoszenie</div>
+        <div class="offer-headline">Zapisujemy Twoje zgłoszenie…</div>
+        <div class="offer-desc">Rezerwujemy wyróżnienie dla „Lniana sukienka BASIC" — płatność potwierdzi nasz zespół.</div>
+        <button class="btn-primary" disabled><span class="spinner"></span> Zapisywanie…</button>
+      </div>
+
+      <!-- STATE 4: Confirmation -->
+      <div class="confirm hidden" id="stateConfirm">
+        <div class="confirm-check">✓</div>
+        <div class="confirm-title">Zgłoszenie przyjęte — kontakt w ciągu 24h</div>
+        <div class="confirm-desc">
+          Nasz zespół skontaktuje się, wyśle link do płatności (99 PLN, Stripe / przelew) i uruchomi wyróżnienie ręcznie po jej otrzymaniu. Od tego momentu produkt będzie widoczny w pierwszym rzędzie kategorii z oznaczeniem „Wyróżnione" przez 7 dni.
+        </div>
+        <div class="confirm-meta">
+          <div class="confirm-meta-row"><span>Produkt</span><span>Lniana sukienka BASIC</span></div>
+          <div class="confirm-meta-row"><span>Okres</span><span>7 dni</span></div>
+          <div class="confirm-meta-row"><span>Kwota</span><span>99 PLN</span></div>
+          <div class="confirm-meta-row"><span>Szacowany zasięg</span><span>~3 200 wyświetleń</span></div>
+        </div>
+      </div>
+
+      <div class="woz-note">
+        <strong>Notatka (Wizard of Oz):</strong> ten ekran nie uruchamia realnego rankingu ani płatności online. „Zobacz, jak to będzie wyglądać" tylko aktualizuje podgląd — zero zobowiązań. Dopiero „Wyróżnij ten produkt — 99 PLN" symuluje zakup; w teście AT-1B-1 realną płatność zbiera account manager (Stripe / przelew), a wyróżnienie ustawia ręcznie w backendzie. Mierzymy: ilu z 20 sellerów wyjmie kartę i ilu wróci.
+      </div>
+    </section>
+
+    <!-- ══════════ RIGHT: BUYER PREVIEW ══════════ -->
+    <section class="zone zone-right">
+      <div class="zone-tag">Podgląd kupującego — na żywo</div>
+
+      <div class="preview-frame">
+        <div class="preview-topbar">fashionhero.pl</div>
+        <div class="preview-nav">
+          <span class="preview-logo">FashionHero</span>
+          <span class="preview-navlinks">WOMEN · MEN · SALE · NEW</span>
+        </div>
+        <div class="preview-crumb">Home / Women's Fashion / Sukienki</div>
+        <div class="preview-h1">Sukienki</div>
+        <div class="preview-count" id="previewCount">70 produktów · sortowanie: Polecane</div>
+
+        <div class="grid" id="grid"><!-- filled by JS --></div>
+      </div>
+
+      <div class="woz-note">
+        <strong>Co się zmienia po kliknięciu:</strong> „Lniana sukienka BASIC" przeskakuje z pozycji #7 na #2 w pierwszym rzędzie i dostaje badge „Wyróżnione" (biały, czarny kant, ostre rogi — wzór z DESIGN.md) — dokładnie to, co zobaczyłby realny kupujący. Szacowany zasięg i nowa pozycja liczbowo są po lewej, w statystykach panelu sprzedawcy — to dane dla sellera, nie dla kupującego.
+      </div>
+    </section>
+  </div>
+
+  <script>
+    // Buyer-side category listing. Seller's product = "mine".
+    const products = [
+      { name: "Sukienka midi kopertowa", variant: "Grafit", price: "329 zł", img: "images/01-grafit.jpg" },
+      { name: "Sukienka trapezowa", variant: "Czerń", price: "279 zł", img: "images/03-czern.jpg" },
+      { name: "Sukienka jedwabna slip", variant: "Ivory", price: "459 zł", img: "images/02-ivory.jpg" },
+      { name: "Sukienka koszulowa", variant: "Khaki", price: "299 zł", img: "images/04-khaki.jpg" },
+      { name: "Sukienka plisowana", variant: "Blush", price: "389 zł", img: "images/05-blush.jpg" },
+      { name: "Sukienka bandażowa", variant: "Camel", price: "349 zł", img: "images/06-camel.jpg" },
+      { name: "Lniana sukienka BASIC", variant: "Ecru", price: "249 zł", mine: true, img: "images/07-ecru-basic.jpg" },
+      { name: "Sukienka maxi boho", variant: "Rdzawy", price: "419 zł", img: "images/08-rdzawy.jpg" },
+      { name: "Sukienka dzianinowa", variant: "Szary melanż", price: "269 zł", img: "images/09-szary-melanz.jpg" },
+    ];
+
+    let boosted = false;
+
+    function render() {
+      // Order: normally mine sits at index 6 (pos #7).
+      // After boost, move mine to index 1 (pos #2).
+      let ordered = [...products];
+      if (boosted) {
+        const mineIdx = ordered.findIndex(p => p.mine);
+        const [mine] = ordered.splice(mineIdx, 1);
+        ordered.splice(1, 0, mine);
+      }
+      const grid = document.getElementById('grid');
+      grid.innerHTML = ordered.map((p, i) => {
+        const pos = i + 1;
+        const showBadge = boosted && p.mine;
+        return `
+          <div class="cell ${p.mine ? 'mine' : ''}">
+            <div class="cell-img">
+              <img src="${p.img}" alt="${p.name} — ${p.variant}" loading="lazy">
+              ${showBadge ? '<span class="badge-promo">Wyróżnione</span>' : ''}
+              <span class="cell-pos">#${pos}</span>
+            </div>
+            <div class="cell-name">${p.name}</div>
+            <div class="cell-variant">${p.variant}</div>
+            <div class="cell-price">${p.price}</div>
+          </div>`;
+      }).join('');
+    }
+
+    function showPreview() {
+      // Krok 1: podgląd, zero zobowiązań. Aktualizuje statystyki sellera + widok kupującego od razu.
+      document.getElementById('stateOffer').classList.add('hidden');
+      document.getElementById('statePreviewed').classList.remove('hidden');
+
+      document.getElementById('posNow').innerHTML = '<span class="stat-before">#7</span> → #2';
+      document.getElementById('viewsNow').innerHTML = '<span class="stat-before">~410</span> → ~3 200';
+
+      boosted = true;
+      document.getElementById('previewCount').textContent = '70 produktów · sortowanie: Polecane · 1 wyróżnione';
+      render();
+    }
+
+    function confirmBoost() {
+      // Krok 2: dopiero teraz symulujemy płatność (real payment zbiera account manager poza tym ekranem).
+      document.getElementById('statePreviewed').classList.add('hidden');
+      document.getElementById('stateLoading').classList.remove('hidden');
+      setTimeout(() => {
+        document.getElementById('stateLoading').classList.add('hidden');
+        document.getElementById('stateConfirm').classList.remove('hidden');
+      }, 1600);
+    }
+
+    render();
+  </script>
+
+</body>
+</html>
